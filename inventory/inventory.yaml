@@ -6,8 +6,8 @@ localhost:
       ansible_python_interpreter: /usr/bin/python3
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
-      passwd: "{{ project_password }}"
-      sa_token: 'sha256~laxu_xy7LygMIrp-1ICzdWtA6gFxiYi2r9jTFaH33Lw'
+      #passwd: "{{ project_password }}"
+      sa_token: 'token'
   vars:
     suffix_name: dev
     annotations: dev-test
@@ -17,3 +17,4 @@ localhost:
     prj_action: create
     prj_name: ordinaryus
     prj_owner: corporation
+
