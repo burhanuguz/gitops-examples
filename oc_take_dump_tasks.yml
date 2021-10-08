@@ -1,12 +1,7 @@
-- name: OCP | Project | Create project for {{ item }} environment
-  hosts: {{ item }}
+- name: OCP | Project | Create project for local environment
+  hosts: local
   gather_facts: no
   serial: 1
   tasks:
-    - name: OCP | Project | Launch playbook for {{ item }} environment
-      import_tasks: ocp_create_project.yml
-  with_items:
-    - localhost
-#    - test
-#    - qa
-#    - prod
+    - name: OCP | Project | Launch playbook for local environment
+      import_tasks: oc_take_dump.yml

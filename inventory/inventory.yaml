@@ -1,13 +1,13 @@
 # Inventory for local environment
-localhost:
+local:
   hosts:
     cluster-local-01:
       ansible_connection: local
       ansible_python_interpreter: /usr/bin/python3
-      url: "https://api.MyTestCluster-1.mydomain.com:6443"
+      url: "https://2886795272-6443-hazel05.environments.katacoda.com/"
       usr: 'MyOCPUser'
       #passwd: "{{ project_password }}"
-      sa_token: 'token'
+      sa_token: 'sha256~laxu_xy7LygMIrp-1ICzdWtA6gFxiYi2r9jTFaH33Lw'
   vars:
     suffix_name: dev
     annotations: dev-test

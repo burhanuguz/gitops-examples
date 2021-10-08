@@ -1,4 +1,20 @@
 ---
+- name: OCP | Project Role | Log in (obtain access token)
+  k8s_auth:
+    username: "{{ ocp_username }}"
+    password: "{{ ocp_password }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+#    validate_certs: false
+  register: k8s_auth_results
+  when: (ocp_token is not defined or ocp_token == "")
+
+- name: OCP | Project | Set the OCP API token value
+  set_fact:  
+    token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
+    project_exists: false
+  no_log: true
+  
 - name: Check if the pod exists, and get the Node Name
   shell: |
     oc get po -n {{ namespace }} {{ pod_name }} --token="{{ token }}" --no-headers -o wide | awk '{print $7}'
@@ -40,3 +56,4 @@
 #    timeout {{ timeout }}s nsenter -t $pod_pid -n -- tcpdump -i any -nn -w /host/mnt/{{ node_name }}-{{ namespace }}-{{ pod_name }}-$(date +"%m-%d-%Y-%H-%M-%S").pcap
 #    EOF
 #  ignore_errors: true
+
