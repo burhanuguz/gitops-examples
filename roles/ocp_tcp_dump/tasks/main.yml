@@ -17,14 +17,14 @@
 
 - name: Connect to website using a previously stored cookie
   ansible.builtin.uri:
-    url: "https://2886795290-6443-kota02.environments.katacoda.com/api/v1/namespaces/{{ namespace }}/pods/{{ pod_name }}"
+    url: "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ pod_name }}"
     method: GET
     return_content: yes
     headers:
       Authorization: "Bearer: {{ token }}"
       Accept: "application/json"
     validate_certs: no
-    register: check_pod_exist
+  register: check_pod_exist
 
 #- name: Check if the pod exists, and get the Node Name
 #  shell: |
@@ -48,8 +48,6 @@
     validate:
       fail_on_error: no
       strict: yes
-  loop:
-    "{{ limit_ranges }}"
 
 #- name: Get TCP Dump
 #  shell: |
