@@ -1,0 +1,18 @@
+# Inventory for local environment
+dev:
+  hosts:
+    cluster-local-01:
+      ansible_connection: local
+      url: "https://api.MyTestCluster-1.mydomain.com:6443"
+      usr: 'MyOCPUser'
+      passwd: "{{ project_password }}"
+      sa_token: 'sha256~laxu_xy7LygMIrp-1ICzdWtA6gFxiYi2r9jTFaH33Lw'
+  vars:
+    suffix_name: dev
+    annotations: dev-test
+    resource_quotas_size: medium
+    prj_sm_name: garanti-servicemesh
+    prj_smmr_name: default
+    prj_action: create
+    prj_name: ordinaryus
+    prj_owner: corporation

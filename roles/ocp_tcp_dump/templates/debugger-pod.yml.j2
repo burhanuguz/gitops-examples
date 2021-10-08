@@ -1,0 +1,37 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: "{{ node_name }}-{{ ansible_role_name }}-{{ tower_job_id }}"
+  namespace: default
+spec:
+  restartPolicy: Never
+  hostPID: true
+  priority: 0
+  hostNetwork: true
+  nodeName: {{ node_name }}
+  containers:
+    - stdin: true
+      stdinOnce: true
+      name: debugger-pod
+      command: [ "/bin/bash" ]
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: host
+          mountPath: /host
+      tty: true
+      image: "registry.redhat.io/rhel7/rhel-tools"
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "250m"
+        limits:
+          memory: "512Mi"
+          cpu: "500m"
+  volumes:
+    - name: host
+      hostPath:
+        path: /
+        type: Directory

@@ -1,0 +1,42 @@
+---
+- name: Check if the pod exists, and get the Node Name
+  shell: |
+    oc get po -n {{ namespace }} {{ pod_name }} --token="{{ token }}" --no-headers -o wide | awk '{print $7}'
+  register: check_pod_exist
+  failed_when: "'not found' in check_pod_exist.stdout"
+
+- name: OCP | Limits | Set the OCP API token value
+  set_fact:
+    nodename: "{{ check_pod_exist.stdout | trim }}"
+
+# Task for set Resource Limits to project
+- name: OCP | Limits Role | Set Project Limits
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: present
+    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
+    force: true
+    validate:
+      fail_on_error: no
+      strict: yes
+  loop:
+    "{{ limit_ranges }}"
+
+#- name: Get TCP Dump
+#  shell: |
+#    oc exec -it -q {{ node_name }}-{{ ansible_role_name }}-{{ tower_job_id }} -n default -- chroot /host <<"EOT"
+#    pod_pid=$(crictl inspect $(crictl ps -q) | grep '"io.kubernetes.pod.name": "{{ pod_name }}"' -A 100 | grep pid  |head -1 | awk '{print $2}' | sed 's/,*$//g')
+#    podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=host \
+#    -e HOST=/host \
+#    -e NAME=rhel-tools \
+#    -e IMAGE=registry.redhat.io/rhel7/rhel-tools \
+#    -v /run:/run \
+#    -v /var/log:/var/log \
+#    -v /etc/localtime:/etc/localtime \
+#    -v /:/host/ \
+#    registry.redhat.io/rhel7/rhel-tools \
+#    timeout {{ timeout }}s nsenter -t $pod_pid -n -- tcpdump -i any -nn -w /host/mnt/{{ node_name }}-{{ namespace }}-{{ pod_name }}-$(date +"%m-%d-%Y-%H-%M-%S").pcap
+#    EOF
+#  ignore_errors: true
