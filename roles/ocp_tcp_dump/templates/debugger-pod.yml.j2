@@ -1,7 +1,7 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: "{{ node_name }}-{{ ansible_role_name }}-{{ tower_job_id }}"
+  name: "{{ node_name }}-{{ ansible_role_name | replace("_", "-") }}-{{ tower_job_id }}"
   namespace: default
 spec:
   restartPolicy: Never

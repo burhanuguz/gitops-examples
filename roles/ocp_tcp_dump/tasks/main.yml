@@ -23,7 +23,10 @@
 
 - name: OCP | Limits | Set the OCP API token value
   set_fact:
-    nodename: "{{ check_pod_exist.stdout | trim }}"
+    node_name: "{{ check_pod_exist.stdout | trim }}"
+
+- debug:
+    var: "{{ node_name }}"
 
 # Task for set Resource Limits to project
 - name: OCP | Limits Role | Set Project Limits
@@ -37,8 +40,6 @@
     validate:
       fail_on_error: no
       strict: yes
-  loop:
-    "{{ limit_ranges }}"
 
 #- name: Get TCP Dump
 #  shell: |
