@@ -15,27 +15,21 @@
     project_exists: false
   no_log: true
 
-- name: Connect to website using a previously stored cookie
-  ansible.builtin.uri:
-    url: "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ pod_name }}"
-    method: GET
-    return_content: yes
-    headers:
-      Authorization: "Bearer: {{ token }}"
-      Accept: "application/json"
-    validate_certs: no
+- name: Check if the pod exists, and get the Node Name
+  shell: |
+    curl -ks \
+    -H "Authorization: Bearer {{ token }}" \
+    -H 'Accept: application/json' \
+    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ pod_name }}" | jq -r '.spec.nodeName'
   register: check_pod_exist
-
-#- name: Check if the pod exists, and get the Node Name
-#  shell: |
-#    curl -ks -H "Authorization: Bearer sha256~gEk9oVD31aTkI5G5Zur0zCN-3ujsG-TF6c5-UIpmuJ8" -H 'Accept: application/json' "https://2886795290-6443-kota02.environments.katacoda.com/api/v1/namespaces/default/pods/ale" --insecure | jq -r '.spec.nodeName'
-#  register: check_pod_exist
-#  failed_when: "'not found' in check_pod_exist.stdout"
+  failed_when: "'null' in check_pod_exist"
 
 - name: OCP | Limits | Set the OCP API token value
   set_fact:
-    nodename: "{{ check_pod_exist.stdout | trim }}"
+    node_name: "{{ check_pod_exist.stdout | trim }}"
 
+- debug:
+    var: "{{ node_name }}"
 # Task for set Resource Limits to project
 - name: OCP | Limits Role | Set Project Limits
   k8s:
