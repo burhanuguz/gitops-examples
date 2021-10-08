@@ -1,8 +1,9 @@
 # Inventory for local environment
-dev:
+localhost:
   hosts:
     cluster-local-01:
       ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
       url: "https://api.MyTestCluster-1.mydomain.com:6443"
       usr: 'MyOCPUser'
       passwd: "{{ project_password }}"
