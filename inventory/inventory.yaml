@@ -4,10 +4,10 @@ local:
     cluster-local-01:
       ansible_connection: local
       ansible_python_interpreter: /usr/bin/python3
-      url: "https://2886795272-6443-hazel05.environments.katacoda.com/"
+      url: "https://2886795290-6443-kota02.environments.katacoda.com/"
       usr: 'MyOCPUser'
       #passwd: "{{ project_password }}"
-      sa_token: 'sha256~laxu_xy7LygMIrp-1ICzdWtA6gFxiYi2r9jTFaH33Lw'
+      sa_token: 'sha256~gEk9oVD31aTkI5G5Zur0zCN-3ujsG-TF6c5-UIpmuJ8'
   vars:
     suffix_name: dev
     annotations: dev-test
@@ -17,4 +17,3 @@ local:
     prj_action: create
     prj_name: ordinaryus
     prj_owner: corporation
-
