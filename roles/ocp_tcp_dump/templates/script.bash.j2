@@ -12,3 +12,4 @@ podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=h
 registry.redhat.io/rhel8/support-tools \
 timeout {{ execution_time }}s nsenter -t ${pod_pid} -n -- tcpdump -i any -nn -w /host/tmp/${pcap_file}.pcap
 EOT
+

@@ -18,7 +18,7 @@
     label_value=$(curl -ks \
     -H "Authorization: Bearer {{ token }}" \
     -H 'Accept: application/json' \
-    "{{ api_url }}/apis/apps/v1/{{ namespace }}/deployments/{{ deployment_name }}" | jq -r ".spec.selector.matchLabels.{{ label_key }}")
+    "{{ api_url }}/apis/apps/v1/namespaces/{{ namespace }}/deployments/{{ deployment_name }}" | jq -r ".spec.selector.matchLabels.{{ label_key }}")
     
     curl -ks \
     -H "Authorization: Bearer {{ token }}" \
@@ -28,7 +28,7 @@
   failed_when: "'null' in check_deployment_exist"
   when: resource_type == "deployment"
 
-- name: OCP | TCP Dump | Set the pods' names
+- name: OCP | TCP Dump | Set the pods' deployed Node Names
   set_fact:  
     pods: "{% if pods is defined and pods != '' %}{{ pods }} {% else %}{{ check_deployment_exist.stdout_lines }}{% endif %}"
 
@@ -44,7 +44,7 @@
 
 - name: OCP | TCP Dump | Set the pods' Node Name
   set_fact:
-    node_name: "{{ check_pods_deployed_node.stdout | trim }}"
+    nodes: "{{ check_pods_deployed_node | json_query('results[*].stdout') }}"
 
 # Task for creating Debugger Pod to take TCP Dump
 - name: OCP | TCP Dump Role | Create Debugger Pod
