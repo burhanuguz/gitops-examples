@@ -9,7 +9,7 @@ spec:
     - /bin/bash
     - -c
     - |-
-      "{{ lookup('template', 'script.bash.j2') | indent(4, false) }}"
+      "{{ lookup('template', 'script.bash.j2') | indent(6, false) }}"
     image: registry.redhat.io/rhel8/support-tools
     name: "{{ item.1 }}-{{ ansible_role_name | replace("_", "-") }}-{{ item.0 }}-{{ tower_job_id }}"
     resources:

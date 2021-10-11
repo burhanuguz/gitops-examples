@@ -15,6 +15,3 @@
     tower_job_id: "1"
     namespace: "default"
     pod_name: "example"
-    project_name: "{{ prj_name }}-{{ suffix_name }}"
-    project_annotation: "deploy-env={{ prj_owner }}-{{ annotations }}"
-    project_action: 'create'
