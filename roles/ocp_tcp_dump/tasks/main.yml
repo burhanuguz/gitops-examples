@@ -13,18 +13,38 @@
     token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
   no_log: true
 
-- name: OCP | TCP Dump | Check if the pod exists, and get the Node Name
+- name: OCP | TCP Dump | Check if the deployment exists and get the label
+  shell: |
+    label_value=$(curl -ks \
+    -H "Authorization: Bearer {{ token }}" \
+    -H 'Accept: application/json' \
+    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/deployments/{{ deployment_name }}" | jq -r ".spec.selector.matchLabels.{{ label_key }}")
+    
+    curl -ks \
+    -H "Authorization: Bearer {{ token }}" \
+    -H 'Accept: application/json' \
+    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods?labelSelector={{ label_key }}%3D${label_value}" | jq -r '.items.metadata.name'
+  register: check_deployment_exist
+  failed_when: "'null' in check_deployment_exist"
+  when: resource_type == "deployment"
+
+- name: OCP | TCP Dump | Set the pod names according to deployment
+  set_fact:  
+    pods: "{% if pods is defined and pods != '' %}{{ pods }} {% else %}{{ check_deployment_exist.stdout_lines }}{% endif %}"
+
+- name: OCP | TCP Dump | Get the pods' Node Name
   shell: |
     curl -ks \
     -H "Authorization: Bearer {{ token }}" \
     -H 'Accept: application/json' \
-    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ pod_name }}" | jq -r '.spec.nodeName'
-  register: check_pod_exist
-  failed_when: "'null' in check_pod_exist"
+    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ item }}" | jq -r '.spec.nodeName'
+  register: check_pod_deployed_node
+  failed_when: "'null' in check_pod_deployed_node"
+  with_items: "{{ pods }}"
 
-- name: OCP | TCP Dump | Set the OCP API token value
+- name: OCP | TCP Dump | Set the pods' Node Name
   set_fact:
-    node_name: "{{ check_pod_exist.stdout | trim }}"
+    node_name: "{{ check_pod_deployed_node.stdout | trim }}"
 
 # Task for creating Debugger Pod to take TCP Dump
 - name: OCP | TCP Dump Role | Create Debugger Pod
@@ -38,6 +58,9 @@
     validate:
       fail_on_error: no
       strict: yes
+  with_together: 
+    - {{ pods }}
+    - {{ nodes }}
 
 # Task for deleting Debugger Pod
 - name: OCP | TCP Dump Role | Create Debugger Pod
@@ -52,4 +75,7 @@
       reason: "PodCompleted"
       type: "Ready"
       status: "False"
+  with_together: 
+    - {{ pods }}
+    - {{ nodes }}
 

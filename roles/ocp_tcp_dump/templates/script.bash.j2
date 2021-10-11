@@ -1,6 +1,6 @@
 [[ $(date +"%M") -le {{ start_time }} ]] && while [[ $(date +"%M") -lt {{ start_time }} ]]; do sleep 1; done && chroot /host <<"EOT"
-pcap_file="{{ node_name }}-{{ namespace }}-{{ pod_name }}-$(date +"%m-%d-%Y-%H-%M")"
-pod_pid=$(crictl inspectp $(crictl pods --name {{ pod_name }} --namespace {{ namespace }} --quiet) | jq .info.pid)
+pcap_file="{{ item.1 }}-{{ namespace }}-{{ item.0 }}-$(date +"%m-%d-%Y-%H-%M")"
+pod_pid=$(crictl inspectp $(crictl pods --name {{ item.0 }} --namespace {{ namespace }} --quiet) | jq .info.pid)
 podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=host \
 -e HOST=/host \
 -e NAME=rhel-tools \
