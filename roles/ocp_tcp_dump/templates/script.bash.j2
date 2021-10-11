@@ -1,4 +1,4 @@
-chroot /host <<"EOT"
+([[ $(date +"%M") -le {{ start_time }} ]] && echo "Too late to execute"; exit 1) || while [[ $(date +"%M") -lt {{ start_time }} ]]; do sleep 1; done && chroot /host <<"EOT"
 pcap_file="{{ item.1 }}-{{ namespace }}-{{ item.0 }}-$(date +"%m-%d-%Y-%H-%M")"
 pod_pid=$(crictl inspectp $(crictl pods --name {{ item.0 }} --namespace {{ namespace }} --quiet) | jq .info.pid)
 podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=host \
@@ -12,4 +12,3 @@ podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=h
 registry.redhat.io/rhel8/support-tools \
 timeout {{ execution_time }}s nsenter -t ${pod_pid} -n -- tcpdump -i any -nn -w /host/tmp/${pcap_file}.pcap
 EOT
-
