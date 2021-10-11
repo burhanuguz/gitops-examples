@@ -1,18 +1,16 @@
 ---
-- name: OCP | Project Role | Log in (obtain access token)
+- name: OCP | TCP Dump Role | Log in (obtain access token)
   k8s_auth:
     username: "{{ ocp_username }}"
     password: "{{ ocp_password }}"
     host: "{{ api_url }}"
     verify_ssl: "{{ ocp_verify_ssl }}"
-#    validate_certs: false
   register: k8s_auth_results
   when: (ocp_token is not defined or ocp_token == "")
 
-- name: OCP | Project | Set the OCP API token value
+- name: OCP | TCP Dump | Set the OCP API token value
   set_fact:  
     token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
-    project_exists: false
   no_log: true
 
 - name: Check if the pod exists, and get the Node Name
@@ -24,43 +22,34 @@
   register: check_pod_exist
   failed_when: "'null' in check_pod_exist"
 
-- name: OCP | Limits | Set the OCP API token value
+- name: OCP | TCP Dump | Set the OCP API token value
   set_fact:
     node_name: "{{ check_pod_exist.stdout | trim }}"
 
-- name: test
-  shell: echo {{ node_name }}
+# Task for creating Debugger Pod to take TCP Dump
+- name: OCP | TCP Dump Role | Create Debugger Pod
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: present
+    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
+    force: true
+    validate:
+      fail_on_error: no
+      strict: yes
 
-- name: Get TCP Dump
-  shell: |
-    oc exec -it -q {{ node_name }}-{{ ansible_role_name }}-{{ tower_job_id }} -n default -- chroot /host <<"EOT"
-    pod_pid=$(crictl inspect $(crictl ps -q) | grep '"io.kubernetes.pod.name": "{{ pod_name }}"' -A 100 | grep pid  |head -1 | awk '{print $2}' | sed 's/,*$//g')
-    podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=host \
-    -e HOST=/host \
-    -e NAME=rhel-tools \
-    -e IMAGE=registry.redhat.io/rhel7/rhel-tools \
-    -v /run:/run \
-    -v /var/log:/var/log \
-    -v /etc/localtime:/etc/localtime \  a
-    -v /:/host/ \
-    registry.redhat.io/rhel7/rhel-tools \
-    timeout {{ timeout }}s nsenter -t $pod_pid -n -- tcpdump -i any -nn -w /host/mnt/{{ node_name }}-{{ namespace }}-{{ pod_name }}-$(date +"%m-%d-%Y-%H-%M-%S").pcap
-    EOF
-  ignore_errors: true
+# Task for deleting Debugger Pod
+- name: OCP | TCP Dump Role | Create Debugger Pod
+  k8s:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    state: absent
+    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
+    wait: yes
+    wait_condition:
+      reason: "PodCompleted"
+      type: "Ready"
+      status: "False"
 
-#registry.redhat.io/rhel8/support-tools
-#
-#oc debug node/$(oc get nodes --no-headers --output=custom-columns=NAME:.metadata.name) --image="registry.redhat.io/rhel8/support-tools" --quiet=true -- /bin/bash -c '
-#[[ $(date +"%M") -le 32 ]] && while [[ $(date +"%M") -lt 32 ]]; do sleep 1; done && chroot /host <<"EOT"
-#pod_pid=$(crictl inspectp $(crictl pods --name example --namespace default --quiet) | jq .info.pid)
-#podman run -it --rm --name rhel-tools --privileged --ipc=host --net=host --pid=host \
-#-e HOST=/host \
-#-e NAME=rhel-tools \
-#-e IMAGE=registry.redhat.io/rhel8/support-tools \
-#-v /run:/run \
-#-v /var/log:/var/log \
-#-v /etc/localtime:/etc/localtime \
-#-v /:/host/ \
-#registry.redhat.io/rhel8/support-tools \
-#timeout 3s nsenter -t ${pod_pid} -n -- tcpdump -i any -nn -w /host/mnt/test-$(date +"%m-%d-%Y-%H-%M-%S").pcap
-#EOT'
