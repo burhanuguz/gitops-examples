@@ -13,7 +13,7 @@
     token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
   no_log: true
 
-- name: Check if the pod exists, and get the Node Name
+- name: OCP | TCP Dump | Check if the pod exists, and get the Node Name
   shell: |
     curl -ks \
     -H "Authorization: Bearer {{ token }}" \
