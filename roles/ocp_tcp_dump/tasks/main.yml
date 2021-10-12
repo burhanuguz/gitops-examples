@@ -46,7 +46,6 @@
   set_fact:
     nodes: "{{ check_pods_deployed_node | json_query('results[*].stdout') }}"
 
-# Task for creating Debugger Pod to take TCP Dump
 - name: OCP | TCP Dump Role | Create Debugger Pod
   k8s:
     api_key: "{{ token }}"
@@ -62,7 +61,7 @@
     - "{{ pods }}"
     - "{{ nodes }}"
 
-- name: OCP | TCP Dump | Get the pods' Node Name
+- name: OCP | TCP Dump | Check if pods' done taking dumps
   shell: |
     curl -ks \
     -H "Authorization: Bearer {{ token }}" \
@@ -73,7 +72,7 @@
   failed_when: "'Failed' in check_debug_pod_status"
   until: check_debug_pod_status.stdout == "Succeeded"
   delay: "{{ execution_time|int + 5 }}"
-  retries: 2
+  retries: 1
 
 # Task for deleting Debugger Pod
 - name: OCP | TCP Dump Role | Delete Debugger Pod

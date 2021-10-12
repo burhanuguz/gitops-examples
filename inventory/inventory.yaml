@@ -4,10 +4,10 @@ local:
     cluster-local-01:
       ansible_connection: local
       ansible_python_interpreter: /usr/bin/python3
-      url: 'https://2886795293-6443-elsy07.environments.katacoda.com'
+      url: 'https://2886795267-6443-lando02.environments.katacoda.com'
       usr: 'MyOCPUser'
       #passwd: "{{ project_password }}"
-      sa_token: 'sha256~kChYdWrj3r67MGuzSyuzbg8Bqg122xkdyGuGW7UP1EE'
+      sa_token: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IkpUbVRwczhHVWhoT3otZURxcEZTVUJvZ2tJNENlYlZXV3dqUXpXTXNsRk0ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlYnVnZ2VyLXRva2VuLW1uenh6Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlYnVnZ2VyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOGQwMGQyMGYtYjkwMS00MzM5LWI3MWQtNmUyOGYzMTUwZjk5Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6ZGVidWdnZXIifQ.HlfErSJwy3iOVUlz6ILZQzzLSeLhoH2Z5fcsuuZLRH6jak6LzStMQKL7tSO7Xt_CSIT37Fd5nZUAWa242UTATX7tecQcIcPaTbBNSM0Q-xWBHALFwcGnr-SZTOEkXGNR2taYAiX0XqupDJyRoCsmHzgcTR3Pqt2TU5NbZpfkRnfpU9jOgW-rZld367KlfMEzPZHrA4-ncJsUQgnyyRiI3r8qADt0a-ZWUgNR7AEVPAFkane57MUUSif5TCfRt2zS3tXuU0w_cJV6wZJXlcLyEhKphpSCOQ9DSjeFo6C3URkzfTcnCjB7-qdPEOfIz5Pq8khrnB70Tw6hSFtb4tFGFg'
   vars:
     suffix_name: dev
     annotations: dev-test
