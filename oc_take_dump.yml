@@ -1,8 +1,7 @@
 # --------------------------------------------------------------------------------
-# Playbook used to create a Project in OCP Cluster
+# Playbook used to take TCP dump in OCP Cluster
 # --------------------------------------------------------------------------------
 
-# 1.- Create project in each cluster for each environment (DEV, TEST, QA and PROD)
 - name: Role ocp_project
   include_role: 
     name: ocp_tcp_dump
