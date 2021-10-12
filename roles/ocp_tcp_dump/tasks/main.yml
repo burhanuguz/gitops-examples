@@ -62,20 +62,31 @@
     - "{{ pods }}"
     - "{{ nodes }}"
 
+- name: OCP | TCP Dump | Get the pods' Node Name
+  shell: |
+    curl -ks \
+    -H "Authorization: Bearer {{ token }}" \
+    -H 'Accept: application/json' \
+    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ item }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}" | jq -r ".status.phase"
+  with_items: "{{ pods }}"
+  register: check_debug_pod_status
+  failed_when: "'Failed' in check_debug_pod_status"
+  until: check_debug_pod_status.stdout == "Succeeded"
+  delay: "{{ execution_time|int + 5 }}"
+  retries: 2
+
 # Task for deleting Debugger Pod
-- name: OCP | TCP Dump Role | Create Debugger Pod
+- name: OCP | TCP Dump Role | Delete Debugger Pod
   k8s:
     api_key: "{{ token }}"
     host: "{{ api_url }}"
     verify_ssl: "{{ ocp_verify_ssl }}"
     state: absent
-    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
-    wait: yes
-    wait_condition:
-      reason: "PodCompleted"
-      type: "Ready"
-      status: "False"
-  with_together: 
-    - "{{ pods }}"
-    - "{{ nodes }}"
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: "{{ item }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}"
+        namespace: default
+  with_items: "{{ pods }}"
 

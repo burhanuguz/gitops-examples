@@ -12,5 +12,3 @@
     ocp_password: "{{ passwd }}"
     ocp_token: "{{ sa_token }}"
     ocp_verify_ssl: false
-    namespace: "default"
-    pod_name: "example"

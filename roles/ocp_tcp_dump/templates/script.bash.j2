@@ -1,17 +1,6 @@
-[[ {{ start_time }} -le $(date +"%M") ]] && (echo "Too late to execute" && exit 1) || while [[ {{ start_time }} -lt $(date +"%M") ]]; do sleep 1; done && chroot /host <<"EOT"
+[[ $(( {{ start_time }} % 60 )) -le $(date +"%M") ]] && echo "Too late to execute" && exit 1
+while [[ $(( {{ start_time }} % 60 )) -lt $(date +"%M") ]]; do sleep 1; done
 pcap_file="{{ item.1 }}-{{ namespace }}-{{ item.0 }}-$(date +"%m-%d-%Y-%H-%M")"
-echo ${pcap_file}.pcap
-pod_pid=$(crictl inspectp $(crictl pods --name '^{{ item.0 }}$' --namespace '^{{ namespace }}$' --quiet) | jq .info.pid)
-echo ${pod_pid}
-podman run -it --rm --name {{ ansible_role_name | replace("_", "-") }}-rhel-tools-{{ tower_job_id }} --privileged --ipc=host --net=host --pid=host \
--e HOST=/host \
--e NAME={{ ansible_role_name | replace("_", "-") }}-rhel-tools-{{ tower_job_id }} \
--e IMAGE=registry.redhat.io/rhel8/support-tools \
--v /run:/run \
--v /var/log:/var/log \
--v /etc/localtime:/etc/localtime \
--v /:/host/ \
-registry.redhat.io/rhel8/support-tools \
+pod_pid=$(chroot /host /bin/bash -c 'crictl inspectp $(crictl pods --name "^{{ item.0 }}$" --namespace "^{{ namespace }}$" --quiet) | jq .info.pid')
 timeout {{ execution_time }}s nsenter -t ${pod_pid} -n -- tcpdump -i any -nn -w /host/tmp/${pcap_file}.pcap
-EOT
 exit 0

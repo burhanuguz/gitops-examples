@@ -4,10 +4,10 @@ local:
     cluster-local-01:
       ansible_connection: local
       ansible_python_interpreter: /usr/bin/python3
-      url: 'https://2886795283-6443-elsy07.environments.katacoda.com'
+      url: 'https://2886795293-6443-elsy07.environments.katacoda.com'
       usr: 'MyOCPUser'
       #passwd: "{{ project_password }}"
-      sa_token: 'sha256~05ap6Jf9wM3fV005LFrAi4lFq5GRBcTMUSMVplKWuZM'
+      sa_token: 'sha256~kChYdWrj3r67MGuzSyuzbg8Bqg122xkdyGuGW7UP1EE'
   vars:
     suffix_name: dev
     annotations: dev-test
