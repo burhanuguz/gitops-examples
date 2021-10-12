@@ -12,6 +12,5 @@
     ocp_password: "{{ passwd }}"
     ocp_token: "{{ sa_token }}"
     ocp_verify_ssl: false
-    tower_job_id: "1"
     namespace: "default"
     pod_name: "example"
