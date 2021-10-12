@@ -62,20 +62,20 @@
     - "{{ pods }}"
     - "{{ nodes }}"
 
-# Task for deleting Debugger Pod
-- name: OCP | TCP Dump Role | Create Debugger Pod
-  k8s:
-    api_key: "{{ token }}"
-    host: "{{ api_url }}"
-    verify_ssl: "{{ ocp_verify_ssl }}"
-    state: absent
-    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
-    wait: yes
-    wait_condition:
-      reason: "PodCompleted"
-      type: "Ready"
-      status: "False"
-  with_together: 
-    - "{{ pods }}"
-    - "{{ nodes }}"
+## Task for deleting Debugger Pod
+#- name: OCP | TCP Dump Role | Create Debugger Pod
+#  k8s:
+#    api_key: "{{ token }}"
+#    host: "{{ api_url }}"
+#    verify_ssl: "{{ ocp_verify_ssl }}"
+#    state: absent
+#    definition: "{{ lookup('template', 'debugger-pod.yml.j2') | from_yaml }}"
+#    wait: yes
+#    wait_condition:
+#      reason: "PodCompleted"
+#      type: "ContainersReady"
+#      status: "False"
+#  with_together: 
+#    - "{{ pods }}"
+#    - "{{ nodes }}"
 
