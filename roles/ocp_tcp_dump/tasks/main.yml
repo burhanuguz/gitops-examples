@@ -13,38 +13,33 @@
     token: "{% if ocp_token is defined and ocp_token != '' %}{{ ocp_token }} {% else %}{{ k8s_auth_results.k8s_auth.api_key }}{% endif %}"
   no_log: true
 
-- name: OCP | TCP Dump | Check if the deployment exists and get the related pods
-  shell: |
-    label_value=$(curl -ks \
-    -H "Authorization: Bearer {{ token }}" \
-    -H 'Accept: application/json' \
-    "{{ api_url }}/apis/apps/v1/namespaces/{{ namespace }}/deployments/{{ deployment_name }}" | jq -r ".spec.selector.matchLabels.{{ label_key }}")
-    
-    curl -ks \
-    -H "Authorization: Bearer {{ token }}" \
-    -H 'Accept: application/json' \
-    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods?labelSelector={{ label_key }}%3D${label_value}" | jq -r '.items[].metadata.name'
+- name: OCP | TCP Dump | Check if the deployment exists and get the label
+  k8s_info:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ deployment_name }}"
+    namespace: "{{ namespace }}"
+  register: get_label
+
+- name: OCP | TCP Dump | Get pod and node names with label selector
+  k8s_info:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    api_version: v1
+    kind: Pod
+    namespace: "{{ namespace }}"
+    label_selectors:
+      - "app = {{ get_label | json_query('resources[*].spec.selector.matchLabels.app') | join(',') }}"
   register: check_deployment_exist
-  failed_when: "'null' in check_deployment_exist"
-  when: resource_type == "deployment"
 
-- name: OCP | TCP Dump | Set the pods' deployed Node Names
-  set_fact:  
-    pods: "{% if pods is defined and pods != '' %}{{ pods }} {% else %}{{ check_deployment_exist.stdout_lines }}{% endif %}"
-
-- name: OCP | TCP Dump | Get the pods' Node Name
-  shell: |
-    curl -ks \
-    -H "Authorization: Bearer {{ token }}" \
-    -H 'Accept: application/json' \
-    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ item }}" | jq -r '.spec.nodeName'
-  register: check_pods_deployed_node
-  failed_when: "'null' in check_pods_deployed_node"
-  with_items: "{{ pods }}"
-
-- name: OCP | TCP Dump | Set the pods' Node Name
-  set_fact:
-    nodes: "{{ check_pods_deployed_node | json_query('results[*].stdout') }}"
+- set_fact:
+    pods_and_nodes: "{{ check_deployment_exist | json_query(label_query) }}"
+  vars:
+    label_query: "resources[*].{pod_name: metadata.name, node_name: spec.nodeName}"
 
 - name: OCP | TCP Dump Role | Create Debugger Pod
   k8s:
@@ -57,20 +52,21 @@
     validate:
       fail_on_error: no
       strict: yes
-  with_together: 
-    - "{{ pods }}"
-    - "{{ nodes }}"
+  with_items: "{{ pods_and_nodes }}"
 
 - name: OCP | TCP Dump | Check if pods' done taking dumps
-  shell: |
-    curl -ks \
-    -H "Authorization: Bearer {{ token }}" \
-    -H 'Accept: application/json' \
-    "{{ api_url }}/api/v1/namespaces/{{ namespace }}/pods/{{ item }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}" | jq -r ".status.phase"
-  with_items: "{{ pods }}"
-  register: check_debug_pod_status
-  failed_when: "'Failed' in check_debug_pod_status"
-  until: check_debug_pod_status.stdout == "Succeeded"
+  k8s_info:
+    api_key: "{{ token }}"
+    host: "{{ api_url }}"
+    verify_ssl: "{{ ocp_verify_ssl }}"
+    api_version: v1
+    kind: Pod
+    namespace: default
+    name: "{{ item.pod_name }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}"
+  register: check_debugger_pod_status
+  with_items: "{{ pods_and_nodes }}"
+  failed_when: "'Failed' in check_debugger_pod_status | json_query('resources[*].status.phase')"
+  until: check_debugger_pod_status | json_query('resources[*].status.phase') == "Succeeded"
   delay: "{{ execution_time|int + 5 }}"
   retries: 1
 
@@ -85,7 +81,7 @@
       apiVersion: v1
       kind: Pod
       metadata:
-        name: "{{ item }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}"
+        name: "{{ item.pod_name }}-{{ ansible_role_name | replace('_', '-') }}-{{ tower_job_id }}"
         namespace: default
-  with_items: "{{ pods }}"
+  with_items: "{{ pods_and_nodes }}"
 
