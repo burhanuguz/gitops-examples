@@ -1,0 +1,16 @@
+# --------------------------------------------------------------------------------
+# Playbook used to take TCP dump in OCP Cluster
+# --------------------------------------------------------------------------------
+- name: ocp_tcp_dump
+  hosts: all
+  gather_facts: no
+  failed_when: ansible_limit is not defined
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ lookup('vars', ansible_play_name + '_usr') }}"
+    ocp_password: "{{ lookup('vars', ansible_play_name + '_passwd') }}"
+    ocp_token: "{{ lookup('vars', ansible_play_name + '_sa_token') }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ suffix_name }}"
+  roles:
+    - role: ocp_tcp_dump

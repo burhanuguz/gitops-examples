@@ -21,7 +21,7 @@
     api_version: apps/v1
     kind: Deployment
     name: "{{ deployment_name }}"
-    namespace: "{{ namespace }}"
+    namespace: "{{ project_name }}"
   register: get_label
 
 - name: OCP | TCP Dump | Get pod and node names with label selector
@@ -31,7 +31,7 @@
     verify_ssl: "{{ ocp_verify_ssl }}"
     api_version: v1
     kind: Pod
-    namespace: "{{ namespace }}"
+    namespace: "{{ project_name }}"
     label_selectors:
       - "app = {{ get_label | json_query('resources[*].spec.selector.matchLabels.app') | join(',') }}"
   register: check_deployment_exist

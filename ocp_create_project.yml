@@ -1,0 +1,56 @@
+# --------------------------------------------------------------------------------
+# Playbook used to create a Project in OCP Cluster
+# --------------------------------------------------------------------------------
+- name: ocp_create_project
+  hosts: all
+  gather_facts: no
+  serial: 1
+  vars:
+    api_url: "{{ url }}"
+    ocp_username: "{{ lookup('vars', ansible_play_name + '_usr') }}"
+    ocp_password: "{{ lookup('vars', ansible_play_name + '_passwd') }}"
+    ocp_token: "{{ lookup('vars', ansible_play_name + '_sa_token') }}"
+    ocp_project_quota: "{{ lookup('vars', ansible_play_name + '_resource_quotas_size') }}"
+    ocp_project_annotation: "{{ lookup('vars', ansible_play_name + '_annotation') }}"
+    ocp_verify_ssl: false
+    project_name: "{{ prj_name }}-{{ group_names | join(',') }}"
+    project_action: create
+    prj_owner: kkb
+    action_smmr: "notadd"
+  roles:
+    # 1.- Create project in each cluster for each environment (DEV, TEST, UAT and PROD)
+    - role: ocp_project
+      vars:
+        project_annotation: "deploy-env={{ prj_owner }}-{{ ocp_project_annotation }}"
+    
+    # 2.- Set Limitranges for each environment (DEV, TEST, UAT and PROD)
+    - role: ocp_limits
+      vars:
+        limit_ranges: "{{ limits }}"
+      when: not project_exists
+    
+    # 3.- Set Quotas for each environment (DEV, TEST, UAT and PROD)
+    - role: ocp_quotas
+      vars:
+        quotas_size: "{{ ocp_project_quota }}"
+      when: not project_exists
+    
+    ## 4.- Assign egressIP in PROD environment
+    #- role: ocp_egress
+    #  vars:
+    #    project_annotation: "deploy-env={{ prj_owner }}-{{ ocp_project_annotation }}"
+    #  when:
+    #    - group_names == 'prod'
+    #    - not project_exists
+    #
+    ## 5.- Add project to ServiceMeshMemberRolls in PROD environment
+    #- role: ocp_smmr
+    #  vars:
+    #    action_smmr: ''
+    #    project_sm_name: default
+    #    smmr_name: mydomain-servicemesh
+    #  when:
+    #    - group_names == 'prod'
+    #    - not project_exists
+    #    - action_smmr == 'add'
+

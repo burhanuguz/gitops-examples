@@ -1,10 +1,83 @@
-# Inventory for local environment
-local:
+# Inventory for dev environment
+dev:
   hosts:
-    cluster-local-01:
+    cluster-dev-01:
+      #### Basic variables to connect to cluster
       ansible_connection: local
-      ansible_python_interpreter: /usr/bin/python3
-      url: 'http://openshift-api:6443'
-      usr: 'MyOCPUser'
-      passwd: 'MyOCPPass'
-      sa_token: 'TOKEN of debugger service account'
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: ""
+      ## Create Project Credentials
+      ocp_create_project_usr: ''
+      ocp_create_project_passwd: ''
+      ocp_create_project_sa_token: ''
+      ## Debugger Credentials
+      ocp_tcp_dump_usr: ''
+      ocp_tcp_dump_passwd: ''
+      ocp_tcp_dump_sa_token: ''
+  vars:
+    ocp_create_project_annotation: dev-test
+    ocp_create_project_prj_owner: kkb
+    ocp_create_project_resource_quotas_size: medium
+
+# Inventory for test environment
+test:
+  hosts:
+    cluster-test-01:
+      #### Basic variables to connect to cluster
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: ""
+      ## Create Project Credentials
+      ocp_create_project_usr: ''
+      ocp_create_project_passwd: ''
+      ocp_create_project_sa_token: ''
+      ## Debugger Credentials
+      ocp_tcp_dump_usr: ''
+      ocp_tcp_dump_passwd: ''
+      ocp_tcp_dump_sa_token: ''
+  vars:
+    ocp_create_project_annotation: dev-test
+    ocp_create_project_prj_owner: kkb
+    ocp_create_project_resource_quotas_size: medium
+
+# Inventory for uat environment
+uat:
+  hosts:
+    cluster-uat-01:
+      #### Basic variables to connect to cluster
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: ""
+      ## Create Project Credentials
+      ocp_create_project_usr: ''
+      ocp_create_project_passwd: ''
+      ocp_create_project_sa_token: ''
+      ## Debugger Credentials
+      ocp_tcp_dump_usr: ''
+      ocp_tcp_dump_passwd: ''
+      ocp_tcp_dump_sa_token: ''
+  vars:
+    ocp_create_project_annotation: uat
+    ocp_create_project_prj_owner: kkb
+    ocp_create_project_resource_quotas_size: large
+
+# Inventory for prod environment
+prod:
+  hosts:
+    cluster-prod-01:
+      #### Basic variables to connect to cluster
+      ansible_connection: local
+      ansible_python_interpreter: /var/lib/awx/venv/ocp_project/bin/python
+      url: ""
+      ## Create Project Credentials
+      ocp_create_project_usr: ''
+      ocp_create_project_passwd: ''
+      ocp_create_project_sa_token: ''
+      ## Debugger Credentials
+      ocp_tcp_dump_usr: ''
+      ocp_tcp_dump_passwd: ''
+      ocp_tcp_dump_sa_token: ''
+  vars:
+    ocp_create_project_annotation: prod
+    ocp_create_project_prj_owner: kkb
+    ocp_create_project_resource_quotas_size: large

@@ -1,4 +1,4 @@
 label_key: app
 execution_time: 20
-start_time: 0
-
+start_time: "{{ (ansible_date_time.minute|int + start_time|int) % 60 }}"
+resource_type: deployment
