@@ -1,6 +1,0 @@
-- name: OCP | TCP Dump | Create project for local environment
-  hosts: local
-  gather_facts: no
-  tasks:
-    - name: OCP | TCP Dump | Launch playbook for local environment
-      import_tasks: oc_take_dump.yml

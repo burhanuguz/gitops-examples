@@ -14,19 +14,19 @@ python3 -m pip openshift pyyaml kubernetes kubernetes-validate
 ```
 ## For installing on Ansible Tower that works with Python 2, you should create virtual env
 
-~~bash
+```bash
 python3 -m venv /var/lib/awx/venv/ocp_project
 source /var/lib/awx/venv/ocp_project/bin/activate
 umask 0022
 python3 -m pip install pip --upgrade
 python3 -m pip install ansible openshift pyyaml kubernetes kubernetes-validate psutil
 deactivate
-~~
+```
 
 After creating virtual env you should set it on Ansible Tower also.
 
 Then create RBAC and permisions like below.
-~~bash
+```bash
 cat << EOF | oc create -f -
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -74,9 +74,9 @@ rules:
     resources:
       - servicemeshmemberrolls
 EOF
-~~
+```
 
-~~bash
+```bash
 # Either create a service account and give permission to it
 oc create serviceaccount ansible-create-project-sa -n openshift
 oc adm policy add-cluster-role-to-user ansible-create-project-cr -z ansible-create-project-sa -n openshift
@@ -87,6 +87,6 @@ $(oc get serviceaccount -n openshift ansible-create-project-sa -ojsonpath='{rang
 
 # Or directly give permission to Openshift user (e.g LDAP)
 oc adm policy add-cluster-role-to-user ansible-create-project-cr "OPENSHIFTUSER"
-~~
+```
 
 Finally, add the User info or service account token to Ansible Role to use.
