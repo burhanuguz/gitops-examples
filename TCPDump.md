@@ -45,18 +45,18 @@ EOF
 
 ```bash
 # Create service account
-oc create serviceaccounts -n openshift debugger-sa
+oc create serviceaccounts -n openshift ansible-debugger-sa
 # Add privileged SCC to service account 
-oc adm policy add-scc-to-user          privileged          -n openshift -z debugger-sa
+oc adm policy add-scc-to-user          privileged          -n openshift -z ansible-debugger-sa
 # Bind the role to service account
-oc adm policy add-cluster-role-to-user ansible-debugger-cr -n openshift -z debugger-sa
+oc adm policy add-cluster-role-to-user ansible-debugger-cr -n openshift -z ansible-debugger-sa
 ```
 
-- Get the **debugger-sa** service account token to use it in playbook.
+- Get the **ansible-debugger-sa** service account token to use it in playbook.
 
 ```bash
 oc get secret -n openshift \
-$(oc get serviceaccount -n openshift debugger-sa -ojsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep token) \
+$(oc get serviceaccount -n openshift ansible-debugger-sa -ojsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep token) \
 -o jsonpath='{.data.token}' | base64 --decode
 ```
 
@@ -66,7 +66,7 @@ $(oc get serviceaccount -n openshift debugger-sa -ojsonpath='{range .secrets[*]}
 ```bash
 # Get Token
 TOKEN=$(oc get secret -n openshift \
-$(oc get serviceaccount -n openshift debugger-sa -ojsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep token) \
+$(oc get serviceaccount -n openshift ansible-debugger-sa -ojsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep token) \
 -o jsonpath='{.data.token}' | base64 --decode)
 
 # Define API server
